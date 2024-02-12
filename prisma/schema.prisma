@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model alerta {
+  tipo_alerta  String
+  id           Int            @id @default(autoincrement())
+  tipo_usuario tipo_usuario[]
+}
+
+model centroide {
+  id           Int            @id @default(autoincrement())
+  lat          Float?
+  lon          Float?
+  localizacion localizacion[]
+}
+
+model comunidad {
+  id                Int       @id @default(autoincrement())
+  fechaUltimaFusion DateTime?
+  nombre            String?
+  gradoConfianza    Float?
+  miembro           miembro[]
+}
+
+model entidad {
+  id             Int     @id @default(autoincrement())
+  nombre         String?
+  tipo_entidad   String?
+  tipoTransporte String?
+}
+
+model entidad_estacion {
+  entidad_id  Int
+  estacion_id Int
+
+  @@id([entidad_id, estacion_id])
+}
+
+model horarios_alerta {
+  alerta_id Int       @id @default(autoincrement())
+  horario   DateTime?
+}
+
+model incidente {
+  id            Int       @id @default(autoincrement())
+  cierre        DateTime?
+  fecha         DateTime?
+  observaciones String?
+}
+
+model localizacion {
+  id                Int            @id @default(autoincrement())
+  nombre            String?
+  tipo_localizacion String?
+  centroide_id      Int?
+  provincia_id      Int?
+  centroide         centroide?     @relation(fields: [centroide_id], references: [id])
+  tipo_usuario      tipo_usuario[]
+}
+
+model miembro {
+  administrador  String?
+  id             Int     @id @default(autoincrement())
+  rolEnComunidad String?
+  comunidad_id   Int?
+  persona_id     Int?
+
+  comunidad comunidad? @relation(fields: [comunidad_id], references: [id])
+}
+
+model miembro_incidente {
+  miembro_id              Int
+  incidentesReportados_id Int @id
+}
+
+model organizacion {
+  id     Int     @id @default(autoincrement())
+  nombre String?
+}
+
+model servicio {
+  id                    Int      @id @default(autoincrement())
+  tipo_servicio         String?
+  nombre                String?
+  prestado              Boolean?
+  tipoDeServicio        String?
+  estacion_id           Int?
+  servicio_agrupador_id Int?
+}
+
+model tipo_usuario {
+  id                         Int     @id @default(autoincrement())
+  nombre                     String?
+  apellido                   String?
+  tipo_usuario               String
+  email                      String
+  medioComunicacionPreferido String
+  usuario_id                 Int
+  personaDesignada_id        Int
+  localizacion_id            Int
+  alerta_id                  Int
+  organismo_control_id       Int
+
+  usuario      usuario?      @relation(fields: [usuario_id], references: [id])
+  localizacion localizacion? @relation(fields: [localizacion_id], references: [id])
+  alerta       alerta?       @relation(fields: [alerta_id], references: [id])
+}
+
+model usuario {
+  id              Int     @id @default(autoincrement())
+  password        String?
+  puntosConfianza Float?
+  username        String?
+
+  tipo_usuario tipo_usuario[]
+}
+
+model tipo_usuario_entidad {
+  tipo_usuario_id     Int
+  entidad_asociada_id Int @id
+}
+
+model tipo_usuario_servicio {
+  tipo_usuario_id      Int
+  servicio_asociado_id Int @id
+}
