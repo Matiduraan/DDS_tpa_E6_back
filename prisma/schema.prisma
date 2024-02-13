@@ -24,11 +24,12 @@ model centroide {
 }
 
 model comunidad {
-  id                Int       @id @default(autoincrement())
+  id                Int         @id @default(autoincrement())
   fechaUltimaFusion DateTime?
   nombre            String?
   gradoConfianza    Float?
   miembro           miembro[]
+  incidente         incidente[]
 }
 
 model entidad {
@@ -51,10 +52,19 @@ model horarios_alerta {
 }
 
 model incidente {
-  id            Int       @id @default(autoincrement())
-  cierre        DateTime?
-  fecha         DateTime?
-  observaciones String?
+  id                   Int       @id @default(autoincrement())
+  cierre               DateTime?
+  fecha                DateTime?
+  observaciones        String?
+  comunidad_id         Int?
+  servicio_id          Int?
+  usuarioCierre_id     Int?
+  usuarioInformador_id Int?
+
+  comunidad         comunidad? @relation(fields: [comunidad_id], references: [id])
+  servicio          servicio?  @relation(fields: [servicio_id], references: [id])
+  usuarioCierre     usuario?   @relation("usuarioCierre", fields: [usuarioCierre_id], references: [id])
+  usuarioInformador usuario?   @relation("usuarioInformador", fields: [usuarioInformador_id], references: [id])
 }
 
 model localizacion {
@@ -88,13 +98,14 @@ model organizacion {
 }
 
 model servicio {
-  id                    Int      @id @default(autoincrement())
+  id                    Int         @id @default(autoincrement())
   tipo_servicio         String?
   nombre                String?
   prestado              Boolean?
   tipoDeServicio        String?
   estacion_id           Int?
   servicio_agrupador_id Int?
+  incidente             incidente[]
 }
 
 model tipo_usuario {
@@ -121,7 +132,9 @@ model usuario {
   puntosConfianza Float?
   username        String?
 
-  tipo_usuario tipo_usuario[]
+  tipo_usuario       tipo_usuario[]
+  incidenteInformado incidente[]    @relation("usuarioInformador")
+  incidenteCerrado   incidente[]    @relation("usuarioCierre")
 }
 
 model tipo_usuario_entidad {
